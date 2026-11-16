@@ -1,0 +1,416 @@
+@import "@mantine/core/styles.css";
+
+/* =====================================================================
+   Student Registry: design tokens and the parts Mantine does not style.
+   World: a registrar's counter. Ink-blue shell, warm paper ground, and one
+   brass accent used only for selection, search matches and the stamp.
+   ===================================================================== */
+
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --brass: #e5a81e;
+}
+
+:root[data-mantine-color-scheme='light'] {
+  --paper: #f5f2eb;
+  --surface: #fffdf8;
+  --surface-hover: #f0ece0;
+  --line: #e2dccd;
+  --text: #14262b;
+  --text-dim: #54666a;
+  --shell: #0f2f35;
+  --shell-fg: #f3efe4;
+  --card-face: #0f2f35;
+  --brass-soft: rgba(229, 168, 30, 0.3);
+
+  --mantine-color-body: var(--paper);
+  --mantine-color-text: var(--text);
+  --mantine-color-dimmed: var(--text-dim);
+  --mantine-color-placeholder: #5d6e72;
+  --mantine-color-default: var(--surface);
+  --mantine-color-default-hover: var(--surface-hover);
+  --mantine-color-default-color: var(--text);
+  --mantine-color-default-border: #cfc8b6;
+}
+
+:root[data-mantine-color-scheme='dark'] {
+  --paper: #0d1a1d;
+  --surface: #13262b;
+  --surface-hover: #193238;
+  --line: #243b41;
+  --text: #ebe6d8;
+  --text-dim: #9db0b3;
+  --shell: #0a2429;
+  --shell-fg: #f3efe4;
+  --card-face: #123c43;
+  --brass-soft: rgba(229, 168, 30, 0.28);
+
+  --mantine-color-body: var(--paper);
+  --mantine-color-text: var(--text);
+  --mantine-color-dimmed: var(--text-dim);
+  --mantine-color-placeholder: #8fa3a6;
+  --mantine-color-default: var(--surface);
+  --mantine-color-default-hover: var(--surface-hover);
+  --mantine-color-default-color: var(--text);
+  --mantine-color-default-border: #2f4a50;
+}
+
+/* ---- Browser surfaces: selection, caret, scrollbars, focus --------------- */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--brass-soft);
+  color: inherit;
+}
+
+input,
+textarea {
+  caret-color: var(--mantine-color-ink-6);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text-dim) 50%, transparent) transparent;
+}
+
+:where(a, button, [role='button'], [tabindex]):focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: 2px;
+}
+
+.tnum {
+  font-variant-numeric: tabular-nums;
+}
+
+mark {
+  background: var(--brass-soft);
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
+  box-shadow: inset 0 -2px 0 var(--brass);
+}
+
+/* ---- Shell ---------------------------------------------------------------- */
+
+.app-header {
+  background: var(--shell);
+  color: var(--shell-fg);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--brass);
+  color: #1a2a2d;
+  flex: none;
+}
+
+.brand-name {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--shell-fg);
+}
+
+.brand-sub {
+  color: color-mix(in srgb, var(--shell-fg) 68%, transparent);
+  font-size: 0.75rem;
+}
+
+.shell-icon-button {
+  color: var(--shell-fg);
+}
+.shell-icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ---- Page furniture ------------------------------------------------------- */
+
+.page-title {
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+/* ---- Student table ---------------------------------------------------------- */
+
+.student-table {
+  --table-border-color: var(--line);
+  --table-vertical-spacing: 10px;
+  --table-horizontal-spacing: 16px;
+}
+
+.student-table th {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.01em;
+  background: color-mix(in srgb, var(--surface-hover) 55%, transparent);
+}
+
+.student-table td {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.student-row {
+  cursor: pointer;
+  transition: background-color 140ms var(--ease-out);
+}
+.student-row:hover,
+.student-row:focus-within {
+  background: var(--surface-hover);
+}
+
+/* The chevron carries the hover motion; the row itself never moves. */
+.row-chevron {
+  opacity: 0.35;
+  transition:
+    transform 180ms var(--ease-out),
+    opacity 180ms var(--ease-out);
+}
+.student-row:hover .row-chevron,
+.student-row:focus-within .row-chevron {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.student-link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: none;
+}
+.student-link:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--brass);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
+.search-wrap {
+  position: relative;
+}
+
+/* The hint sits in the gap under the search box, so it never pushes the table down. */
+.search-hint {
+  position: absolute;
+  top: 100%;
+  left: 2px;
+  margin-top: 4px;
+}
+
+.show-narrow {
+  display: none;
+}
+
+/* ---- ID card (student detail) ------------------------------------------------ */
+
+.idcard-wrap {
+  position: relative;
+}
+
+.idcard {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px 32px;
+  border-radius: 10px;
+  background: var(--card-face);
+  color: #f3efe4;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 14px 28px -16px rgba(6, 24, 28, 0.55);
+}
+
+/* A soft light that follows the pointer while the card tilts. */
+.idcard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 200ms var(--ease-out);
+  background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 0%), rgba(255, 255, 255, 0.1), transparent 60%);
+}
+.idcard-wrap:hover .idcard::after {
+  opacity: 1;
+}
+
+.idcard-main {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-width: 0;
+}
+
+.idcard-name {
+  color: #f6f2e7;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.idcard-no {
+  display: inline-flex;
+  font-family: var(--mantine-font-family-monospace);
+  font-size: 1.0625rem;
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  color: #f3d58a;
+}
+
+/* Each character sits in a clipped box so it can roll up into place. */
+.roll {
+  display: inline-block;
+  overflow: hidden;
+  line-height: 1.3;
+  vertical-align: bottom;
+}
+
+.idcard-meta {
+  color: color-mix(in srgb, #f3efe4 72%, transparent);
+  font-size: 0.8125rem;
+}
+
+.idcard-sweep {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateX(-130%);
+  background: linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, 0.14) 50%, transparent 56%);
+}
+
+.idcard-seal {
+  position: absolute;
+  top: 50%;
+  right: 140px;
+  width: 84px;
+  height: 84px;
+  margin-top: -42px;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.idcard-actions {
+  position: relative;
+  flex: none;
+}
+
+/* ---- Detail sections ---------------------------------------------------------- */
+
+.detail-section {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  gap: 16px 32px;
+  padding: 24px 28px;
+}
+.detail-section + .detail-section {
+  border-top: 1px solid var(--line);
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px 28px;
+}
+
+.detail-field {
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border-radius: 4px;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+
+.detail-value {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+
+/* ---- Form drawer ----------------------------------------------------------------- */
+
+.mantine-Drawer-title {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  letter-spacing: -0.01em;
+}
+
+/* Inputs take the surface colour in both schemes (Mantine's dark default is grey). */
+.mantine-Input-input {
+  --input-bg: var(--surface);
+}
+
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin-inline: calc(var(--mantine-spacing-lg) * -1);
+  padding: 12px var(--mantine-spacing-lg);
+  background: var(--mantine-color-body);
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 760px) {
+  .hide-narrow {
+    display: none;
+  }
+  /* Keep the status badge readable: tighter padding, and the student cell gives up width. */
+  .student-table {
+    --table-horizontal-spacing: 12px;
+  }
+  .student-table td:first-child {
+    max-width: calc(100vw - 170px);
+  }
+  .student-table .mantine-Badge-root {
+    max-width: none;
+  }
+  .show-narrow {
+    display: block;
+  }
+  .detail-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 20px;
+  }
+  .idcard {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px;
+  }
+  .idcard-seal {
+    right: 16px;
+    top: 16px;
+    margin-top: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-row,
+  .row-chevron,
+  .idcard::after {
+    transition-duration: 0.01ms;
+  }
+  .student-row:hover .row-chevron,
+  .student-row:focus-within .row-chevron {
+    transform: none;
+  }
+}

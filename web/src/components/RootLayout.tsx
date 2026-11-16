@@ -61,9 +61,6 @@ export function RootLayout() {
             onClick={() => void navigate({ to: '/', search: DEFAULT_SEARCH })}
           >
             <Group gap="sm" wrap="nowrap">
-              <span className="brand-mark">
-                <GraduationCapIcon size={20} weight="fill" />
-              </span>
               <div>
                 <Text className="brand-name" size="md" lh={1.1}>
                   Student Registry

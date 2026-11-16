@@ -1,7 +1,7 @@
-import type {FieldKey, LookupItem, Student, StudentInput} from '@/domains/student/api'
+import type { FieldKey, LookupItem, Student, StudentInput } from '@/domains/student/api'
 import dayjs from 'dayjs'
-import { useMemo,useRef, useState } from 'react'
-import { Alert, Button, Divider, Group, Radio, Select, SimpleGrid, Stack, TextInput } from '@mantine/core'
+import { useMemo, useRef, useState, useEffect } from 'react'
+import { Alert, Button, Group, Radio, Select, SimpleGrid, Stack, TextInput } from '@mantine/core'
 import { DateInput } from '@mantine/dates'
 import { useForm } from '@mantine/form'
 import { notifications } from '@mantine/notifications'
@@ -40,8 +40,7 @@ type FormValues = {
   middleName: string
   lastName: string
   gender: string
-  // Mantine 8+ date inputs use 'YYYY-MM-DD' strings, which is also what BC expects.
-  dateOfBirth: string | null
+  dateOfBirth: Date | null
   idNumber: string
   nationality: string | null
   county: string | null
@@ -57,7 +56,7 @@ function initialValues(student?: Student): FormValues {
     middleName: student?.middleName ?? '',
     lastName: student?.lastName ?? '',
     gender: student?.gender ?? '',
-    dateOfBirth: student?.dateOfBirth || null,
+    dateOfBirth: student?.dateOfBirth ? dayjs(student.dateOfBirth).toDate() : null,
     idNumber: student?.idNumber ?? '',
     nationality: student?.nationality || null,
     county: student?.county || null,
@@ -68,14 +67,13 @@ function initialValues(student?: Student): FormValues {
   }
 }
 
-// Every field as a trimmed string, so "did this change?" is a simple comparison.
 function toStrings(v: FormValues): Record<FieldKey, string> {
   return {
     firstName: v.firstName.trim(),
     middleName: v.middleName.trim(),
     lastName: v.lastName.trim(),
     gender: v.gender,
-    dateOfBirth: v.dateOfBirth ?? '',
+    dateOfBirth: v.dateOfBirth ? dayjs(v.dateOfBirth).format('YYYY-MM-DD') : '',
     idNumber: v.idNumber.trim(),
     nationality: v.nationality ?? '',
     county: v.county ?? '',
@@ -86,8 +84,6 @@ function toStrings(v: FormValues): Record<FieldKey, string> {
   }
 }
 
-// Register: send every filled-in field.
-// Edit: send only what changed, plus the version, so nothing else is touched.
 function buildPayload(
   values: FormValues,
   initialStrings: Record<FieldKey, string>,
@@ -109,7 +105,6 @@ function buildPayload(
 
 function toOptions(items: LookupItem[], currentCode?: string, currentName?: string) {
   const options = items.map((i) => ({ value: i.code, label: `${i.name} (${i.code})` }))
-  // Older records may hold a code that is not in the list: keep it selectable.
   if (currentCode && !options.some((o) => o.value === currentCode)) {
     options.unshift({ value: currentCode, label: currentName || currentCode })
   }
@@ -140,6 +135,7 @@ export function StudentForm({
   onReload,
 }: Props) {
   const formRef = useRef<HTMLFormElement>(null)
+  const firstErrorRef = useRef<HTMLElement | null>(null)
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [conflict, setConflict] = useState(false)
@@ -147,8 +143,6 @@ export function StudentForm({
   const initial = useMemo(() => initialValues(student), [student])
   const initialStrings = useMemo(() => toStrings(initial), [initial])
 
-  // On edit we only insist on fields the user actually touched, so an older
-  // student with incomplete data can still have just a phone number fixed.
   const mustCheck = (key: FieldKey, current: string) =>
     mode === 'create' || current !== initialStrings[key]
 
@@ -159,7 +153,7 @@ export function StudentForm({
       firstName: (v) => (mustCheck('firstName', v.trim()) && !v.trim() ? 'First name is required' : null),
       lastName: (v) => (mustCheck('lastName', v.trim()) && !v.trim() ? 'Last name is required' : null),
       gender: (v) => (mustCheck('gender', v) && !v ? 'Choose a gender' : null),
-      dateOfBirth: (v) => (mustCheck('dateOfBirth', v ?? '') && !v ? 'Date of birth is required' : null),
+      dateOfBirth: (v) => (mustCheck('dateOfBirth', v ? dayjs(v).format('YYYY-MM-DD') : '') && !v ? 'Date of birth is required' : null),
       idNumber: (v) => (mustCheck('idNumber', v.trim()) && !v.trim() ? 'ID number is required' : null),
       phone: (v) => {
         const t = v.trim()
@@ -177,6 +171,14 @@ export function StudentForm({
       },
     },
   })
+
+  // Focus first invalid field on validation error
+  useEffect(() => {
+    if (firstErrorRef.current) {
+      firstErrorRef.current.focus()
+      firstErrorRef.current = null
+    }
+  }, [form.errors])
 
   const handleValid = async (values: FormValues) => {
     setFormError(null)
@@ -196,7 +198,6 @@ export function StudentForm({
         if (err.code === 'CONFLICT') {
           setConflict(true)
         } else if (Object.keys(err.fields).length > 0) {
-          // Show each BC message under the matching input, and take the user to the first one.
           form.setErrors(err.fields)
           setFormError('Please correct the highlighted fields.')
           revealFormErrors(formRef.current)
@@ -211,17 +212,24 @@ export function StudentForm({
     }
   }
 
-  // Browser-side validation failed: same treatment, so every error feels the same.
   const handleInvalid = () => {
     setFormError(null)
     revealFormErrors(formRef.current)
   }
 
+  const getErrorId = (field: string) => `${field}-error`
+  const getHelperId = (field: string) => `${field}-helper`
+
   return (
     <form ref={formRef} onSubmit={form.onSubmit(handleValid, handleInvalid)} noValidate>
-      <Stack gap="md">
+      <Stack >
         {conflict && (
-          <Alert color="orange" icon={<WarningCircleIcon size={18} />} title="Someone else changed this student">
+          <Alert
+            color="orange"
+            icon={<WarningCircleIcon size={18} />}
+            title="Someone else changed this student"
+            role="alert"
+          >
             Your edits were not saved. Load the latest details and apply your changes again.
             {onReload && (
               <Group mt="sm">
@@ -239,101 +247,170 @@ export function StudentForm({
         )}
 
         {formError && !conflict && (
-          <Alert color="red" icon={<WarningCircleIcon size={18} />}>
+          <Alert color="red" icon={<WarningCircleIcon size={18} />} role="alert">
             {formError}
           </Alert>
         )}
 
-        <Divider label="Identity" labelPosition="left" />
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <TextInput label="First name" withAsterisk {...form.getInputProps('firstName')} />
-          <TextInput label="Middle name" {...form.getInputProps('middleName')} />
-        </SimpleGrid>
-        <TextInput label="Last name" withAsterisk {...form.getInputProps('lastName')} />
+        <fieldset className="form-section">
+          <legend className="form-section-title">Identity</legend>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} >
+            <TextInput
+              label="First name"
+              required
+              aria-required="true"
+              aria-describedby={getHelperId('firstName')}
+              aria-invalid={form.errors.firstName ? 'true' : 'false'}
+              aria-errormessage={form.errors.firstName ? getErrorId('firstName') : undefined}
+              {...form.getInputProps('firstName')}
+            />
+            <TextInput
+              label="Middle name"
+              aria-describedby={getHelperId('middleName')}
+              {...form.getInputProps('middleName')}
+            />
+          </SimpleGrid>
+          <TextInput
+            label="Last name"
+            required
+            aria-required="true"
+            aria-describedby={getHelperId('lastName')}
+            aria-invalid={form.errors.lastName ? 'true' : 'false'}
+            aria-errormessage={form.errors.lastName ? getErrorId('lastName') : undefined}
+            {...form.getInputProps('lastName')}
+          />
 
-        <Radio.Group label="Gender" withAsterisk {...form.getInputProps('gender')}>
-          <Group mt="xs">
-            <Radio value="Male" label="Male" />
-            <Radio value="Female" label="Female" />
-          </Group>
-        </Radio.Group>
+          <Radio.Group
+            label="Gender"
+            required
+            aria-required="true"
+            aria-describedby={getHelperId('gender')}
+            aria-invalid={form.errors.gender ? 'true' : 'false'}
+            aria-errormessage={form.errors.gender ? getErrorId('gender') : undefined}
+            {...form.getInputProps('gender')}
+          >
+            <Group mt="xs" role="radiogroup" aria-label="Gender">
+              <Radio value="Male" label="Male" />
+              <Radio value="Female" label="Female" />
+            </Group>
+          </Radio.Group>
 
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <DateInput
-            label="Date of birth"
-            placeholder="YYYY-MM-DD"
-            valueFormat="YYYY-MM-DD"
-            withAsterisk
-            clearable
-            maxDate={dayjs().format('YYYY-MM-DD')}
-            minDate="1900-01-01"
-            {...form.getInputProps('dateOfBirth')}
+          <SimpleGrid cols={{ base: 1, sm: 2 }} >
+            <DateInput
+              label="Date of birth"
+              placeholder="YYYY-MM-DD"
+              valueFormat="YYYY-MM-DD"
+              required
+              aria-required="true"
+              aria-describedby={getHelperId('dateOfBirth')}
+              aria-invalid={form.errors.dateOfBirth ? 'true' : 'false'}
+              aria-errormessage={form.errors.dateOfBirth ? getErrorId('dateOfBirth') : undefined}
+              clearable
+              maxDate={dayjs().format('YYYY-MM-DD')}
+              minDate="1900-01-01"
+              {...form.getInputProps('dateOfBirth')}
+            />
+            <TextInput
+              label="ID number"
+              required
+              aria-required="true"
+              leftSection={<IdentificationCardIcon size={16} aria-hidden="true" />}
+              aria-describedby={getHelperId('idNumber')}
+              aria-invalid={form.errors.idNumber ? 'true' : 'false'}
+              aria-errormessage={form.errors.idNumber ? getErrorId('idNumber') : undefined}
+              {...form.getInputProps('idNumber')}
+            />
+          </SimpleGrid>
+        </fieldset>
+
+        <fieldset className="form-section">
+          <legend className="form-section-title">Origin</legend>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} >
+            <Select
+              label="Nationality"
+              placeholder={lookupsLoading ? 'Loading…' : 'Select'}
+              searchable
+              clearable
+              disabled={lookupsLoading}
+              data={toOptions(nationalities, student?.nationality, student?.nationalityName)}
+              aria-describedby={getHelperId('nationality')}
+              aria-invalid={form.errors.nationality ? 'true' : 'false'}
+              aria-errormessage={form.errors.nationality ? getErrorId('nationality') : undefined}
+              {...form.getInputProps('nationality')}
+            />
+            <Select
+              label="County"
+              placeholder={lookupsLoading ? 'Loading…' : 'Select'}
+              searchable
+              clearable
+              disabled={lookupsLoading}
+              data={toOptions(counties, student?.county, student?.countyName)}
+              aria-describedby={getHelperId('county')}
+              aria-invalid={form.errors.county ? 'true' : 'false'}
+              aria-errormessage={form.errors.county ? getErrorId('county') : undefined}
+              {...form.getInputProps('county')}
+            />
+          </SimpleGrid>
+        </fieldset>
+
+        <fieldset className="form-section">
+          <legend className="form-section-title">Contact</legend>
+          <SimpleGrid cols={{ base: 1, sm: 2 }} >
+            <TextInput
+              label="Phone"
+              placeholder="0712345678"
+              required
+              aria-required="true"
+              leftSection={<PhoneIcon size={16} aria-hidden="true" />}
+              aria-describedby={getHelperId('phone')}
+              aria-invalid={form.errors.phone ? 'true' : 'false'}
+              aria-errormessage={form.errors.phone ? getErrorId('phone') : undefined}
+              {...form.getInputProps('phone')}
+            />
+            <TextInput
+              label="Alternate phone"
+              leftSection={<PhoneIcon size={16} aria-hidden="true" />}
+              aria-describedby={getHelperId('alternatePhone')}
+              aria-invalid={form.errors.alternatePhone ? 'true' : 'false'}
+              aria-errormessage={form.errors.alternatePhone ? getErrorId('alternatePhone') : undefined}
+              {...form.getInputProps('alternatePhone')}
+            />
+          </SimpleGrid>
+          <TextInput
+            label="Email"
+            type="email"
+            leftSection={<EnvelopeSimpleIcon size={16} aria-hidden="true" />}
+            aria-describedby={getHelperId('email')}
+            aria-invalid={form.errors.email ? 'true' : 'false'}
+            aria-errormessage={form.errors.email ? getErrorId('email') : undefined}
+            {...form.getInputProps('email')}
           />
           <TextInput
-            label="ID number"
-            withAsterisk
-            leftSection={<IdentificationCardIcon size={16} />}
-            {...form.getInputProps('idNumber')}
+            label="Postal address"
+            leftSection={<MapPinIcon size={16} aria-hidden="true" />}
+            aria-describedby={getHelperId('postalAddress')}
+            {...form.getInputProps('postalAddress')}
           />
-        </SimpleGrid>
+        </fieldset>
 
-        <Divider label="Origin" labelPosition="left" mt="sm" />
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <Select
-            label="Nationality"
-            placeholder={lookupsLoading ? 'Loading…' : 'Select'}
-            searchable
-            clearable
-            disabled={lookupsLoading}
-            data={toOptions(nationalities, student?.nationality, student?.nationalityName)}
-            {...form.getInputProps('nationality')}
-          />
-          <Select
-            label="County"
-            placeholder={lookupsLoading ? 'Loading…' : 'Select'}
-            searchable
-            clearable
-            disabled={lookupsLoading}
-            data={toOptions(counties, student?.county, student?.countyName)}
-            {...form.getInputProps('county')}
-          />
-        </SimpleGrid>
-
-        <Divider label="Contact" labelPosition="left" mt="sm" />
-        <SimpleGrid cols={{ base: 1, sm: 2 }}>
-          <TextInput
-            label="Phone"
-            placeholder="0712345678"
-            withAsterisk
-            leftSection={<PhoneIcon size={16} />}
-            {...form.getInputProps('phone')}
-          />
-          <TextInput
-            label="Alternate phone"
-            leftSection={<PhoneIcon size={16} />}
-            {...form.getInputProps('alternatePhone')}
-          />
-        </SimpleGrid>
-
-        <TextInput
-          label="Email"
-          leftSection={<EnvelopeSimpleIcon size={16} />}
-          {...form.getInputProps('email')}
-        />
-        <TextInput
-          label="Postal address"
-          leftSection={<MapPinIcon size={16} />}
-          {...form.getInputProps('postalAddress')}
-        />
-
-        <Group justify="flex-end" className="form-actions">
-          <Button variant="default" onClick={onCancel} disabled={saving}>
+        <div className="form-actions" role="group" aria-label="Form actions">
+          <Button
+            variant="default"
+            data-premium="secondary"
+            onClick={onCancel}
+            disabled={saving}
+          >
             Cancel
           </Button>
-          <Button type="submit" loading={saving} disabled={conflict}>
+          <Button
+            type="submit"
+            data-premium="true"
+            loading={saving}
+            disabled={conflict}
+          >
             {mode === 'create' ? 'Register student' : 'Save changes'}
           </Button>
-        </Group>
+        </div>
       </Stack>
     </form>
   )

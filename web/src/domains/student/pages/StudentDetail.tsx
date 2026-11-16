@@ -20,6 +20,7 @@ import { DEFAULT_SEARCH } from '@/lib/constants'
 import { ageFrom, formatDate } from '@/lib/format'
 import { IdCard } from '@/components/IdCard'
 import { prefersReducedMotion, useGsapEffect } from '@/lib/motion'
+import gsap from 'gsap'
 
 const WATCHED: (keyof Student)[] = [
   'fullName',
@@ -38,7 +39,7 @@ function Field({ name, label, value }: { name: keyof Student; label: string; val
   return (
     <div className="detail-field" data-field={name}>
       <div className="detail-label">{label}</div>
-      <div className="detail-value">{value || <Text span c="dimmed">Not provided</Text>}</div>
+      <div className="detail-value">{value || <Text span c="dimmed" fw={400}>Not provided</Text>}</div>
     </div>
   )
 }
@@ -46,12 +47,14 @@ function Field({ name, label, value }: { name: keyof Student; label: string; val
 function Section({ title, hint, children }: { title: string; hint: string; children: ReactNode }) {
   return (
     <section className="detail-section">
-      <div>
-        <Text fw={600}>{title}</Text>
-        <Text size="sm" c="dimmed" mt={2}>
+      <Stack gap="xs">
+        <Text fw={700} size="sm" c="dimmed" tt="uppercase" style={{ letterSpacing: '0.1em' }}>
+          {title}
+        </Text>
+        <Text size="sm" c="dimmed" lh={1.6} style={{ maxWidth: '600px' }}>
           {hint}
         </Text>
-      </div>
+      </Stack>
       <div className="detail-grid">{children}</div>
     </section>
   )
@@ -104,7 +107,12 @@ export function StudentDetailPage() {
   }
 
   const backButton = (
-    <Button variant="subtle" leftSection={<ArrowLeftIcon size={16} />} onClick={goBack} w="fit-content">
+    <Button
+      data-premium="secondary"
+      leftSection={<ArrowLeftIcon size={16} />}
+      onClick={goBack}
+      w="fit-content"
+    >
       Back to students
     </Button>
   )
@@ -128,6 +136,7 @@ export function StudentDetailPage() {
           color={notFound ? 'yellow' : 'red'}
           icon={<WarningCircleIcon size={18} />}
           title={notFound ? 'Student not found' : "Couldn't load this student"}
+          role="alert"
         >
           <Text size="sm">
             {notFound
@@ -165,7 +174,7 @@ export function StudentDetailPage() {
 
       <IdCard student={student} onEdit={openEdit} />
 
-      <div ref={panelRef} className="panel">
+      <div ref={panelRef} className="panel-elevated detail-panel">
         <Section title="Personal details" hint="Who the student is, as recorded at registration.">
           <Field name="fullName" label="Full name" value={student.fullName} />
           <Field name="gender" label="Gender" value={student.gender} />

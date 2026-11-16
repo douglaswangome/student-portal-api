@@ -1,10 +1,6 @@
 @import "@mantine/core/styles.css";
-
-/* =====================================================================
-   Student Registry: design tokens and the parts Mantine does not style.
-   Light: warm paper, ink-blue shell, brass accent.
-   Dark: sophisticated off-black, elevated surfaces, brass accent.
-   ===================================================================== */
+@import "@mantine/dates/styles.css";
+@import "@mantine/notifications/styles.css";
 
 :root {
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
@@ -49,6 +45,8 @@
   --surface: #212121;
   --surface-hover: #2a2a2a;
   --surface-elevated: #292929;
+  --input-bg: #2a2a2a;
+  --input-bg-hover: #303030;
   --line: #333333;
   --line-strong: #404040;
   --text: #ededed;
@@ -57,6 +55,7 @@
   --shell: #111111;
   --shell-fg: #ededed;
   --card-face: #1a1a1a;
+  --required-accent: #e57373;
 
   --mantine-color-body: var(--bg);
   --mantine-color-text: var(--text);
@@ -66,7 +65,7 @@
   --mantine-color-default-hover: var(--surface-hover);
   --mantine-color-default-color: var(--text);
   --mantine-color-default-border: var(--line);
-  --mantine-color-input-bg: var(--surface);
+  --mantine-color-input-bg: var(--input-bg);
   --mantine-color-input-border: var(--line);
   --mantine-color-input-border-hover: var(--line-strong);
 }
@@ -351,41 +350,64 @@ mark {
 
 /* ---- Detail sections -------------------------------------------------------- */
 
-.detail-section {
-  display: grid;
-  grid-template-columns: 200px minmax(0, 1fr);
-  gap: 16px 32px;
-  padding: 24px 28px;
+.detail-panel {
+  padding: 32px;
 }
-.detail-section + .detail-section {
-  border-top: 1px solid var(--line);
+.detail-panel > .detail-section:first-child {
+  padding-top: 0;
+}
+.detail-panel > .detail-section {
+  padding-top: 48px;
+  /* No border — whitespace is the separator */
 }
 
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px 28px;
+  gap: 28px 32px;
+  row-gap: 28px;
 }
 
 .detail-field {
-  padding: 4px 8px;
-  margin: -4px -8px;
-  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .detail-label {
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.62rem;
+  font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin-bottom: 4px;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
 }
 
 .detail-value {
   font-variant-numeric: tabular-nums;
   overflow-wrap: break-word;
   color: var(--text);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Responsive detail panel */
+@media (max-width: 760px) {
+  .detail-panel {
+    padding: 24px 20px;
+  }
+  .detail-panel > .detail-section {
+    padding-top: 40px;
+  }
+  .detail-grid {
+    grid-template-columns: 1fr;
+    gap: 20px 0;
+    row-gap: 20px;
+  }
+  .detail-value {
+    font-size: 0.875rem;
+  }
 }
 
 /* ---- Form drawer ------------------------------------------------------------ */
@@ -396,19 +418,22 @@ mark {
   letter-spacing: -0.01em;
 }
 
-/* Inputs take the surface colour in both schemes */
+/* Inputs - distinct off-black background, crisp borders, sharp focus */
 .mantine-TextInput-input,
 .mantine-Select-input,
 .mantine-DateInput-input,
 .mantine-Textarea-textarea {
   background: var(--mantine-color-input-bg) !important;
   border-color: var(--mantine-color-input-border) !important;
+  border-width: 1px !important;
+  transition: border-color 120ms var(--ease-out), box-shadow 120ms var(--ease-out), background-color 120ms var(--ease-out) !important;
 }
 .mantine-TextInput-input:hover,
 .mantine-Select-input:hover,
 .mantine-DateInput-input:hover,
 .mantine-Textarea-textarea:hover {
   border-color: var(--mantine-color-input-border-hover) !important;
+  background: var(--input-bg-hover) !important;
 }
 .mantine-TextInput-input:focus,
 .mantine-Select-input:focus,
@@ -416,11 +441,72 @@ mark {
 .mantine-Textarea-textarea:focus {
   border-color: var(--brass) !important;
   box-shadow: 0 0 0 2px var(--brass-soft) !important;
+  background: var(--input-bg) !important;
 }
 
-/* Radio group styling */
+/* Input wrapper (label + input) */
+.mantine-TextInput-wrapper,
+.mantine-Select-wrapper,
+.mantine-DateInput-wrapper {
+  width: 100%;
+}
+
+/* Required asterisk - muted coral, not harsh red */
+.mantine-TextInput-label[data-required]::after,
+.mantine-Select-label[data-required]::after,
+.mantine-DateInput-label[data-required]::after,
+.mantine-Radio-label[data-required]::after {
+  content: ' (required)' !important;
+  color: var(--required-accent) !important;
+  font-size: 0.7rem !important;
+  font-weight: 500 !important;
+  margin-left: 4px !important;
+  vertical-align: middle !important;
+}
+
+/* Hide the default asterisk */
+.mantine-TextInput-asterisk,
+.mantine-Select-asterisk,
+.mantine-DateInput-asterisk,
+.mantine-Radio-asterisk {
+  display: none !important;
+}
+
+/* Label styling */
+.mantine-TextInput-label,
+.mantine-Select-label,
+.mantine-DateInput-label {
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  color: var(--text-dim) !important;
+  margin-bottom: 6px !important;
+}
+
+/* Radio group styling - aligned, premium */
+.mantine-Radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 .mantine-Radio-label {
   color: var(--text) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  cursor: pointer;
+}
+.mantine-Radio-input {
+  width: 18px !important;
+  height: 18px !important;
+  flex-shrink: 0;
+}
+.mantine-Radio-ring {
+  border-width: 1.5px !important;
+  border-color: var(--line-strong) !important;
+  transition: border-color 120ms var(--ease-out), box-shadow 120ms var(--ease-out), background-color 120ms var(--ease-out) !important;
+}
+.mantine-Radio-input:hover + .mantine-Radio-ring {
+  border-color: var(--brass) !important;
 }
 .mantine-Radio-input:focus-visible + .mantine-Radio-ring {
   border-color: var(--brass) !important;
@@ -429,6 +515,101 @@ mark {
 .mantine-Radio-input:checked + .mantine-Radio-ring {
   border-color: var(--brass) !important;
   background: var(--brass) !important;
+}
+.mantine-Radio-inner {
+  background: var(--bg) !important;
+}
+
+/* Select dropdown (native select wrapper) */
+.mantine-Select-input {
+  padding-right: 40px !important;
+}
+.mantine-Select-rightSection {
+  color: var(--text-muted) !important;
+}
+
+/* DateInput specific */
+.mantine-DateInput-input {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Form section fieldsets - modern dividers */
+.form-section {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+.form-section + .form-section {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.form-section-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+  padding-bottom: 0;
+  border-bottom: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.form-section-title::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+  opacity: 0.5;
+}
+
+/* Primary button - premium white on dark, or dark with subtle border */
+.mantine-Button-root[data-premium="true"] {
+  background: #ffffff !important;
+  color: #161616 !important;
+  border: none !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em !important;
+  transition: background-color 120ms var(--ease-out), color 120ms var(--ease-out), box-shadow 120ms var(--ease-out) !important;
+}
+.mantine-Button-root[data-premium="true"]:hover:not(:disabled) {
+  background: #f5f5f5 !important;
+}
+.mantine-Button-root[data-premium="true"]:active:not(:disabled) {
+  background: #e8e8e8 !important;
+}
+.mantine-Button-root[data-premium="true"]:focus-visible {
+  outline: 2px solid var(--brass) !important;
+  outline-offset: 2px !important;
+}
+.mantine-Button-root[data-premium="true"]:disabled {
+  background: #333333 !important;
+  color: #737373 !important;
+}
+
+/* Secondary button - dark with subtle border */
+.mantine-Button-root[data-premium="secondary"] {
+  background: var(--input-bg) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  font-weight: 500 !important;
+  transition: background-color 120ms var(--ease-out), border-color 120ms var(--ease-out), color 120ms var(--ease-out) !important;
+}
+.mantine-Button-root[data-premium="secondary"]:hover:not(:disabled) {
+  background: var(--input-bg-hover) !important;
+  border-color: var(--line-strong) !important;
+}
+.mantine-Button-root[data-premium="secondary"]:focus-visible {
+  outline: 2px solid var(--brass) !important;
+  outline-offset: 2px !important;
+}
+
+/* Error message styling */
+.mantine-Alert-root {
+  border-radius: 8px;
 }
 
 .form-actions {
@@ -439,6 +620,9 @@ mark {
   padding: 16px var(--mantine-spacing-lg);
   background: var(--mantine-color-body);
   border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 
 /* ---- Responsive: Mobile < 760px -------------------------------------------- */
@@ -484,6 +668,124 @@ mark {
   .search-hint {
     position: static;
     margin-top: 8px;
+  }
+
+  /* Mobile card stack for students list */
+  .mobile-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 4px 0;
+  }
+
+  .student-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 120ms var(--ease-out), background-color 120ms var(--ease-out), box-shadow 120ms var(--ease-out);
+  }
+  .student-card:hover,
+  .student-card:focus-within {
+    border-color: var(--brass);
+    background: var(--surface-hover);
+    box-shadow: 0 4px 16px -8px rgba(0, 0, 0, 0.4);
+    text-decoration: none;
+  }
+  .student-card:focus-visible {
+    outline: 2px solid var(--brass);
+    outline-offset: 2px;
+  }
+
+  .student-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .student-card-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .student-card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .student-card-meta > * {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .student-card-email {
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+
+  .student-card-chevron {
+    opacity: 0.3;
+    transition: transform 140ms var(--ease-out), opacity 140ms var(--ease-out);
+    flex-shrink: 0;
+    color: var(--brass);
+  }
+  .student-card:hover .student-card-chevron,
+  .student-card:focus-within .student-card-chevron {
+    opacity: 1;
+    transform: translateX(3px);
+  }
+
+  .student-card-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  .empty-state {
+    padding: 32px 16px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 16px;
+  }
+  .page-header > div {
+    width: 100%;
+  }
+  .page-header button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .pagination-bar {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 12px;
+  }
+  .pagination-bar > div:first-child {
+    text-align: center;
+  }
+  .pagination-bar > div:last-child {
+    justify-content: center;
   }
 }
 

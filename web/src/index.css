@@ -2,60 +2,76 @@
 
 /* =====================================================================
    Student Registry: design tokens and the parts Mantine does not style.
-   World: a registrar's counter. Ink-blue shell, warm paper ground, and one
-   brass accent used only for selection, search matches and the stamp.
+   Light: warm paper, ink-blue shell, brass accent.
+   Dark: sophisticated off-black, elevated surfaces, brass accent.
    ===================================================================== */
 
 :root {
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --brass: #e5a81e;
+  --brass-soft: rgba(229, 168, 30, 0.28);
 }
+
+/* ---- Light mode (refined) --------------------------------------------------- */
 
 :root[data-mantine-color-scheme='light'] {
   --paper: #f5f2eb;
   --surface: #fffdf8;
   --surface-hover: #f0ece0;
+  --surface-elevated: #ffffff;
   --line: #e2dccd;
+  --line-strong: #cfc8b6;
   --text: #14262b;
   --text-dim: #54666a;
+  --text-muted: #7a8a8e;
   --shell: #0f2f35;
   --shell-fg: #f3efe4;
   --card-face: #0f2f35;
-  --brass-soft: rgba(229, 168, 30, 0.3);
 
   --mantine-color-body: var(--paper);
   --mantine-color-text: var(--text);
   --mantine-color-dimmed: var(--text-dim);
-  --mantine-color-placeholder: #5d6e72;
+  --mantine-color-placeholder: var(--text-muted);
   --mantine-color-default: var(--surface);
   --mantine-color-default-hover: var(--surface-hover);
   --mantine-color-default-color: var(--text);
-  --mantine-color-default-border: #cfc8b6;
+  --mantine-color-default-border: var(--line-strong);
+  --mantine-color-input-bg: var(--surface);
+  --mantine-color-input-border: var(--line);
+  --mantine-color-input-border-hover: var(--line-strong);
 }
+
+/* ---- Dark mode: sophisticated off-black ------------------------------------- */
 
 :root[data-mantine-color-scheme='dark'] {
-  --paper: #0d1a1d;
-  --surface: #13262b;
-  --surface-hover: #193238;
-  --line: #243b41;
-  --text: #ebe6d8;
-  --text-dim: #9db0b3;
-  --shell: #0a2429;
-  --shell-fg: #f3efe4;
-  --card-face: #123c43;
-  --brass-soft: rgba(229, 168, 30, 0.28);
+  --bg: #161616;
+  --bg-elevated: #1a1a1a;
+  --surface: #212121;
+  --surface-hover: #2a2a2a;
+  --surface-elevated: #292929;
+  --line: #333333;
+  --line-strong: #404040;
+  --text: #ededed;
+  --text-dim: #a3a3a3;
+  --text-muted: #737373;
+  --shell: #111111;
+  --shell-fg: #ededed;
+  --card-face: #1a1a1a;
 
-  --mantine-color-body: var(--paper);
+  --mantine-color-body: var(--bg);
   --mantine-color-text: var(--text);
   --mantine-color-dimmed: var(--text-dim);
-  --mantine-color-placeholder: #8fa3a6;
+  --mantine-color-placeholder: var(--text-muted);
   --mantine-color-default: var(--surface);
   --mantine-color-default-hover: var(--surface-hover);
   --mantine-color-default-color: var(--text);
-  --mantine-color-default-border: #2f4a50;
+  --mantine-color-default-border: var(--line);
+  --mantine-color-input-bg: var(--surface);
+  --mantine-color-input-border: var(--line);
+  --mantine-color-input-border-hover: var(--line-strong);
 }
 
-/* ---- Browser surfaces: selection, caret, scrollbars, focus --------------- */
+/* ---- Browser surfaces: selection, caret, scrollbars, focus ------------------ */
 
 html {
   -webkit-font-smoothing: antialiased;
@@ -69,12 +85,12 @@ html {
 
 input,
 textarea {
-  caret-color: var(--mantine-color-ink-6);
+  caret-color: var(--brass);
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--text-dim) 50%, transparent) transparent;
+  scrollbar-color: var(--line) transparent;
 }
 
 :where(a, button, [role='button'], [tabindex]):focus-visible {
@@ -94,12 +110,12 @@ mark {
   box-shadow: inset 0 -2px 0 var(--brass);
 }
 
-/* ---- Shell ---------------------------------------------------------------- */
+/* ---- Shell ------------------------------------------------------------------ */
 
 .app-header {
   background: var(--shell);
   color: var(--shell-fg);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  border-bottom: 1px solid var(--line);
 }
 
 .brand-mark {
@@ -109,7 +125,7 @@ mark {
   display: grid;
   place-items: center;
   background: var(--brass);
-  color: #1a2a2d;
+  color: #161616;
   flex: none;
 }
 
@@ -120,7 +136,7 @@ mark {
 }
 
 .brand-sub {
-  color: color-mix(in srgb, var(--shell-fg) 68%, transparent);
+  color: color-mix(in srgb, var(--shell-fg) 60%, transparent);
   font-size: 0.75rem;
 }
 
@@ -128,10 +144,10 @@ mark {
   color: var(--shell-fg);
 }
 .shell-icon-button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
 }
 
-/* ---- Page furniture ------------------------------------------------------- */
+/* ---- Page furniture --------------------------------------------------------- */
 
 .page-title {
   letter-spacing: -0.02em;
@@ -141,10 +157,17 @@ mark {
 .panel {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
-/* ---- Student table ---------------------------------------------------------- */
+.panel-elevated {
+  background: var(--surface-elevated);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: 0 4px 24px -8px rgba(0, 0, 0, 0.4);
+}
+
+/* ---- Student table / data grid --------------------------------------------- */
 
 .student-table {
   --table-border-color: var(--line);
@@ -153,11 +176,12 @@ mark {
 }
 
 .student-table th {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: var(--text-dim);
-  letter-spacing: 0.01em;
-  background: color-mix(in srgb, var(--surface-hover) 55%, transparent);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: var(--bg-elevated);
 }
 
 .student-table td {
@@ -167,19 +191,21 @@ mark {
 
 .student-row {
   cursor: pointer;
-  transition: background-color 140ms var(--ease-out);
+  transition: background-color 120ms var(--ease-out);
 }
 .student-row:hover,
 .student-row:focus-within {
   background: var(--surface-hover);
 }
 
-/* The chevron carries the hover motion; the row itself never moves. */
+.student-row:focus-visible {
+  outline: 2px solid var(--brass);
+  outline-offset: -2px;
+}
+
 .row-chevron {
-  opacity: 0.35;
-  transition:
-    transform 180ms var(--ease-out),
-    opacity 180ms var(--ease-out);
+  opacity: 0.3;
+  transition: transform 140ms var(--ease-out), opacity 140ms var(--ease-out);
 }
 .student-row:hover .row-chevron,
 .student-row:focus-within .row-chevron {
@@ -203,19 +229,19 @@ mark {
   position: relative;
 }
 
-/* The hint sits in the gap under the search box, so it never pushes the table down. */
 .search-hint {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   left: 2px;
-  margin-top: 4px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
 }
 
 .show-narrow {
   display: none;
 }
 
-/* ---- ID card (student detail) ------------------------------------------------ */
+/* ---- ID card (student detail) ---------------------------------------------- */
 
 .idcard-wrap {
   position: relative;
@@ -229,25 +255,14 @@ mark {
   justify-content: space-between;
   gap: 24px;
   padding: 28px 32px;
-  border-radius: 10px;
-  background: var(--card-face);
-  color: #f3efe4;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 14px 28px -16px rgba(6, 24, 28, 0.55);
-}
-
-/* A soft light that follows the pointer while the card tilts. */
-.idcard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 200ms var(--ease-out);
-  background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 0%), rgba(255, 255, 255, 0.1), transparent 60%);
-}
-.idcard-wrap:hover .idcard::after {
-  opacity: 1;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--surface-elevated) 0%, var(--surface) 100%);
+  color: var(--text);
+  border: 1px solid var(--line);
+  box-shadow:
+    0 2px 8px -2px rgba(0, 0, 0, 0.4),
+    0 8px 24px -8px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .idcard-main {
@@ -259,7 +274,7 @@ mark {
 }
 
 .idcard-name {
-  color: #f6f2e7;
+  color: var(--text);
   letter-spacing: -0.02em;
   text-wrap: balance;
 }
@@ -270,10 +285,9 @@ mark {
   font-size: 1.0625rem;
   letter-spacing: 0.04em;
   font-variant-numeric: tabular-nums;
-  color: #f3d58a;
+  color: var(--brass);
 }
 
-/* Each character sits in a clipped box so it can roll up into place. */
 .roll {
   display: inline-block;
   overflow: hidden;
@@ -282,18 +296,42 @@ mark {
 }
 
 .idcard-meta {
-  color: color-mix(in srgb, #f3efe4 72%, transparent);
+  color: var(--text-muted);
   font-size: 0.8125rem;
 }
 
+.idcard-actions {
+  position: relative;
+  flex: none;
+}
+
+/* Avatar inside idcard uses brass background with dark text */
+.idcard .mantine-Avatar-root {
+  --avatar-bg: var(--brass) !important;
+  --avatar-color: var(--bg) !important;
+}
+
+/* Copy button in idcard */
+.idcard .mantine-ActionIcon-root {
+  color: var(--text-dim) !important;
+}
+.idcard .mantine-ActionIcon-root:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+.idcard .mantine-ActionIcon-root[data-color="green"] {
+  color: var(--mantine-color-green-5) !important;
+}
+
+/* Sweep shine effect */
 .idcard-sweep {
   position: absolute;
   inset: 0;
   pointer-events: none;
   transform: translateX(-130%);
-  background: linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, 0.14) 50%, transparent 56%);
+  background: linear-gradient(100deg, transparent 44%, rgba(255, 255, 255, 0.06) 50%, transparent 56%);
 }
 
+/* Seal stamp animation */
 .idcard-seal {
   position: absolute;
   top: 50%;
@@ -304,13 +342,14 @@ mark {
   pointer-events: none;
   visibility: hidden;
 }
-
-.idcard-actions {
-  position: relative;
-  flex: none;
+.idcard-seal circle {
+  stroke: var(--brass);
+}
+.idcard-seal path {
+  stroke: color-mix(in srgb, var(--brass) 75%, white);
 }
 
-/* ---- Detail sections ---------------------------------------------------------- */
+/* ---- Detail sections -------------------------------------------------------- */
 
 .detail-section {
   display: grid;
@@ -335,18 +374,21 @@ mark {
 }
 
 .detail-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
-  color: var(--text-dim);
-  margin-bottom: 2px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 4px;
 }
 
 .detail-value {
   font-variant-numeric: tabular-nums;
   overflow-wrap: break-word;
+  color: var(--text);
 }
 
-/* ---- Form drawer ----------------------------------------------------------------- */
+/* ---- Form drawer ------------------------------------------------------------ */
 
 .mantine-Drawer-title {
   font-weight: 700;
@@ -354,9 +396,39 @@ mark {
   letter-spacing: -0.01em;
 }
 
-/* Inputs take the surface colour in both schemes (Mantine's dark default is grey). */
-.mantine-Input-input {
-  --input-bg: var(--surface);
+/* Inputs take the surface colour in both schemes */
+.mantine-TextInput-input,
+.mantine-Select-input,
+.mantine-DateInput-input,
+.mantine-Textarea-textarea {
+  background: var(--mantine-color-input-bg) !important;
+  border-color: var(--mantine-color-input-border) !important;
+}
+.mantine-TextInput-input:hover,
+.mantine-Select-input:hover,
+.mantine-DateInput-input:hover,
+.mantine-Textarea-textarea:hover {
+  border-color: var(--mantine-color-input-border-hover) !important;
+}
+.mantine-TextInput-input:focus,
+.mantine-Select-input:focus,
+.mantine-DateInput-input:focus,
+.mantine-Textarea-textarea:focus {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 2px var(--brass-soft) !important;
+}
+
+/* Radio group styling */
+.mantine-Radio-label {
+  color: var(--text) !important;
+}
+.mantine-Radio-input:focus-visible + .mantine-Radio-ring {
+  border-color: var(--brass) !important;
+  box-shadow: 0 0 0 2px var(--brass-soft) !important;
+}
+.mantine-Radio-input:checked + .mantine-Radio-ring {
+  border-color: var(--brass) !important;
+  background: var(--brass) !important;
 }
 
 .form-actions {
@@ -364,44 +436,58 @@ mark {
   bottom: 0;
   z-index: 5;
   margin-inline: calc(var(--mantine-spacing-lg) * -1);
-  padding: 12px var(--mantine-spacing-lg);
+  padding: 16px var(--mantine-spacing-lg);
   background: var(--mantine-color-body);
   border-top: 1px solid var(--line);
 }
+
+/* ---- Responsive: Mobile < 760px -------------------------------------------- */
 
 @media (max-width: 760px) {
   .hide-narrow {
     display: none;
   }
-  /* Keep the status badge readable: tighter padding, and the student cell gives up width. */
+
+  /* Table transforms to card stack on mobile */
   .student-table {
     --table-horizontal-spacing: 12px;
   }
+
   .student-table td:first-child {
-    max-width: calc(100vw - 170px);
+    max-width: calc(100vw - 48px);
   }
+
   .student-table .mantine-Badge-root {
     max-width: none;
   }
+
   .show-narrow {
     display: block;
   }
+
   .detail-section {
     grid-template-columns: 1fr;
     gap: 12px;
     padding: 20px;
   }
+
   .idcard {
     flex-direction: column;
     align-items: flex-start;
     padding: 22px;
   }
-  .idcard-seal {
-    right: 16px;
-    top: 16px;
-    margin-top: 0;
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .search-hint {
+    position: static;
+    margin-top: 8px;
   }
 }
+
+/* ---- Reduced motion --------------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
   .student-row,

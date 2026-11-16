@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties } from 'react'
+import { useRef } from 'react'
 import { ActionIcon, Avatar, Badge, Button, CopyButton, Group, Title, Tooltip, VisuallyHidden } from '@mantine/core'
 import { CheckIcon, CopyIcon, PencilSimpleIcon } from '@phosphor-icons/react'
 import gsap from 'gsap'
@@ -76,7 +76,6 @@ export function IdCard({ student, onEdit }: Props) {
             variant="filled"
             size={72}
             radius="md"
-            style={{ '--avatar-bg': 'var(--brass)', '--avatar-color': '#1a2a2d' } as CSSProperties}
           />
           <div style={{ minWidth: 0 }}>
             <Title order={2} className="idcard-name">

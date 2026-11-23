@@ -55,21 +55,7 @@ export function StudentsPage() {
   const [creating, { open: openCreate, close: closeCreate }] = useDisclosure(false)
   const narrow = useMediaQuery('(max-width: 760px)')
 
-  // Debounced search for instant input feel, but URL is source of truth
-  const [debounced] = useDebouncedValue(search, 300)
-  const effectiveSearch = debounced.trim().length >= 2 ? debounced.trim() : ''
-
-  // Sync debounced search to URL (replace to keep history clean)
-  useEffect(() => {
-    if (effectiveSearch !== search) {
-      void navigate({
-        to: '/',
-        search: { search: effectiveSearch, page: 1, pageSize },
-        replace: true,
-      })
-    }
-  }, [effectiveSearch, search, pageSize, navigate])
-
+  
   // Press "/" anywhere to jump to the search box
   useHotkeys([['/', () => inputRef.current?.focus()]])
 

@@ -19,7 +19,7 @@ import {
   TextInput,
   Title,
 } from '@mantine/core'
-import { useDebouncedValue, useDisclosure, useHotkeys, useMediaQuery } from '@mantine/hooks'
+import { useDisclosure, useHotkeys, useMediaQuery } from '@mantine/hooks'
 import {
   ArrowsClockwiseIcon,
   CaretRightIcon,

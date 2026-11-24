@@ -21,6 +21,7 @@ import { ageFrom, formatDate } from '@/lib/format'
 import { IdCard } from '@/components/IdCard'
 import { prefersReducedMotion, useGsapEffect } from '@/lib/motion'
 import gsap from 'gsap'
+import { FeeStatementSection } from '@/components/FeeStatementSection'
 
 const WATCHED: (keyof Student)[] = [
   'fullName',
@@ -199,6 +200,8 @@ export function StudentDetailPage() {
           <Field name="universityEmail" label="University email" value={student.universityEmail} />
           <Field name="postalAddress" label="Postal address" value={student.postalAddress} />
         </Section>
+
+        <FeeStatementSection studentNo={student.studentNo}/>
       </div>
 
       <StudentFormDrawer opened={editing} onClose={closeEdit} student={student} />

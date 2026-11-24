@@ -87,7 +87,7 @@ func (c *Client) Call(ctx context.Context, operation string, params ...Param) (j
 	}
 	defer resp.Body.Close()
 
-	raw, err := io.ReadAll(io.LimitReader(resp.Body, 8<<20))
+	raw, err := io.ReadAll(io.LimitReader(resp.Body, 32<<20))
 	if err != nil {
 		return nil, &UpstreamError{Kind: "unavailable", Detail: err.Error()}
 	}

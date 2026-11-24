@@ -67,6 +67,7 @@ func main() {
 			r.Post("/", handler.Create)
 			r.Get("/{studentNo}", handler.Get)
 			r.Patch("/{studentNo}", handler.Update)
+			r.Get("/{studentNo}/fee-statement", handler.FeeStatement)
 		})
 	})
 

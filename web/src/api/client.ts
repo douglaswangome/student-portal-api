@@ -69,6 +69,33 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   }
 }
 
+// Fetches a file (a PDF, for example) as a Blob.
+//
+// When a request asks for a Blob, an error answer from the server also arrives as a
+// Blob. We read it back as text and parse it, so the readable message, the field
+// errors and the reference number survive instead of becoming "[object Blob]".
+export async function requestBlob(
+  path: string,
+  params?: Record<string, string>,
+  signal?: AbortSignal,
+): Promise<Blob> {
+  try {
+    const response = await api.get<Blob>(path, { params, responseType: 'blob', signal })
+    return response.data
+  } catch (error) {
+    if (axios.isCancel(error)) throw error
+    if (isAxiosError(error) && error.response && error.response.data instanceof Blob) {
+      const text = await error.response.data.text()
+      try {
+        error.response.data = JSON.parse(text)
+      } catch {
+        error.response.data = text
+      }
+    }
+    throw toApiError(error)
+  }
+}
+
 function toApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error
 

@@ -156,6 +156,58 @@ codeunit 90100 "DW Student Service"
         exit((Cust."Customer Type" = Cust."Customer Type"::Student) and (Cust.Blocked = Cust.Blocked::" "));
     end;
 
+    procedure GetFeeStatement(studentNo: Text; fromDate: Text; toDate: Text): Text
+    var
+        Cust: Record Customer;
+        TempBlob: Codeunit "Temp Blob";
+        Base64: Codeunit "Base64 Convert";
+        RecRef: RecordRef;
+        Errors: JsonObject;
+        Data: JsonObject;
+        OutStr: OutStream;
+        InStr: InStream;
+        DateFrom: Date;
+        DateTo: Date;
+    begin
+        if not FindStudent(studentNo, Cust) then
+            exit(NotFoundResponse(studentNo));
+
+        if fromDate <> '' then
+            if not Evaluate(DateFrom, fromDate, 9) then
+                AddError(Errors, 'from', 'Use the format YYYY-MM-DD.');
+        if toDate <> '' then
+            if not Evaluate(DateTo, toDate, 9) then
+                AddError(Errors, 'to', 'Use the format YYYY-MM-DD.');
+        if (DateFrom <> 0D) and (DateTo <> 0D) and (DateFrom > DateTo) then
+            AddError(Errors, 'from', 'The start date must not be after the end date.');
+        if HasErrors(Errors) then
+            exit(ErrorResponse('VALIDATION_ERROR', 'Please correct the dates.', Errors));
+
+        // The same two filters shown on the report's request page in BC
+        Cust.SetRecFilter();
+        if (DateFrom <> 0D) and (DateTo <> 0D) then
+            Cust.SetFilter("Date Filter", '%1..%2', DateFrom, DateTo)
+        else
+            if DateFrom <> 0D then
+                Cust.SetFilter("Date Filter", '%1..', DateFrom)
+            else
+                if DateTo <> 0D then
+                    Cust.SetFilter("Date Filter", '..%1', DateTo);
+
+        RecRef.GetTable(Cust);
+        TempBlob.CreateOutStream(OutStr);
+        Report.SaveAs(51072, '', ReportFormat::Pdf, OutStr, RecRef);
+
+        if not TempBlob.HasValue() then
+            exit(ErrorResponse('REPORT_EMPTY', 'Business Central produced an empty fee statement.', Errors));
+
+        TempBlob.CreateInStream(InStr);
+        AddText(Data, 'fileName', StrSubstNo('FeeStatement-%1.pdf', ConvertStr(Cust."No.", '/\', '--')));
+        AddText(Data, 'contentType', 'application/pdf');
+        AddText(Data, 'base64', Base64.ToBase64(InStr));
+        exit(OkResponse(Data));
+    end;
+
     // UpperTerm must already be upper case
     local procedure MatchesSearch(var Cust: Record Customer; UpperTerm: Text): Boolean
     begin
